@@ -59,6 +59,13 @@ With 10 workers, each worker would handle 16,000 jobs
 
 The server's capacity would have to be taken into consideration to ensure that it can handle the number of workers needed to process the job fast enough.
 
+## Testing
+To run the tests I have set up in `Tests\Unit`, run:
+
+`./vendor/bin/phpunit`
+
+The above command must be run from the root folder of this project.
+
 ## Contributors
 [Fanan Dala](https://fanandala.com)
 
