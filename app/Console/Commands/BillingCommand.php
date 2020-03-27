@@ -3,6 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use App\Jobs\BillUser as BillUserJob;
+use App\Services\Billing\Billing;
 
 class BillingCommand extends Command
 {
@@ -37,6 +40,10 @@ class BillingCommand extends Command
      */
     public function handle()
     {
-        //
+        $biller = new Billing('mock');
+        $users = DB::table('users')->select('amount_to_bill', 'mobile_number')->get();
+        foreach ($users as $user) {
+            BillUserJob::dispatch($user);
+        }
     }
 }
