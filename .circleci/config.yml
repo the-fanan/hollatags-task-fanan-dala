@@ -51,10 +51,10 @@ jobs:
       # set up project and queues
       - run: php artisan key:generate
       - run: php artisan migrate:fresh --seed
-      - run: php artisan queue:work --queue=q1 &
-      - run: php artisan queue:work --queue=q2 &
-      - run: php artisan queue:work --queue=q3 &
-      - run: php artisan queue:work --queue=q4 &
-      - run: php artisan queue:work --queue=q5 &
+      - run: php artisan queue:work &
+      - run: php artisan queue:work &
+      - run: php artisan queue:work &
+      - run: php artisan queue:work &
+      - run: php artisan queue:work &
       # run tests with phpunit or codecept
       - run: ./vendor/bin/phpunit
