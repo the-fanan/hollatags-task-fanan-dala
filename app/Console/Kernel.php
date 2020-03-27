@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
 
-        $schedule->command('hollatags:bill')->everyDay();
+        $schedule->command('hollatags:bill')->daily();
     }
 
     /**
