@@ -1,72 +1,67 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Hollatags Task
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+## The Problem
+- An application for billing 10,000 users over a given billing API (owned by a third
+party e.g. Telco/Bank).
+- The billing API takes 1.6secs to process and respond to each request
+- The details of the users to bill is stored in a Database with fields: id, username, mobile_number and amount_to_bill
 
-## About Laravel
+*Reuirements: Write or describe a simple PHP code that will be able bill all the 10,000 users within 1hr.*
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+*Also suggest an approach to scale the above if you need to bill 100,000 users within 4.5hrs*
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Assumptions
+1. We have the required user data. I have created a seeder to populate the database. The number of users needed can be updated in the `.env` file by changing the value of `SEED_USERS_NUMBER`
+2. The billing is run as a cron job and so I have created a scheduler in `App\Console\Kernel` to run the billing command (`App\Console\Commands\BillingCommand`) daily.
+3. Multiple APIs can be used. I created a Billing Service (`App\Services\Billing\Billing`) that can accept different drivers for different third party APIs to bill users. The current setup uses a Mock Driver (`App\Services\Billing\Drivers\Mock\MockBiller`) that delays for `1.6s` before responding to simulate values given in the task.
+4. The 3rd Party APIs require only the user's mobile number and amount to bill a user.
+5. The script would be run on a server with at least 2GB RAM
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Setting Up
+### ENV
+Update the following data in the `.env` file:
+1. `SEED_USERS_NUMBER` - For the number of users to be seeded
+2. `DB_DATABASE` - Name of database
+3. `DB_USERNAME` - Username of database user
+4. `DB_PASSWORD` - Password for database user
+### Dependencies
+This project uses Redis to queue jobs. So make sure you have redis installed and is running on port `6379`. If your redis is running on a custom port then update the redis port (`REDIS_PORT`) in the `.env` file.
+### Composer
+run `composer install` to install necessary libraries
+### Artisan
+Finally run the following:
+1. `php artisan key:generate`
+2. `php artisan migrate:fresh --seed`
 
-## Learning Laravel
+In order to process the number of rows within the time stated in the task, we need to run at least 5 queue workers to run jobs concurrently. So, run the following command 5 times:
+`php artisan queue:work &`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+OR you can use [Supervisor](https://http://www.supervisord.org/index.html) to set up the queue workers.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Suggestions
+The current solution makes use of Redis to schedule jobs and process them via a worker. Currently, 5 workers are used to executed the task in less than 1 hour.
 
-## Laravel Sponsors
+If the rows are increased to 100,000 and need to be executed in 4.5 hours then at least 10 workers will have to be used.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+So, to scale the speed of our application, we only need to increase the number of workers so that more jobs can be handled concurrently. 
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
+Justification:
 
-## Contributing
+`1 job = 1.6s`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+hence, `100,000 jobs  = 160,000s`
 
-## Security Vulnerabilities
+With 10 workers, each worker would handle 16,000 jobs
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+`160,000s/10 = 16,000s`
+
+`16,000s = 4.444 hours`
+
+The server's capacity would have to be taken into consideration to ensure that it can handle the number of workers needed to process the job fast enough.
+
+## Contributors
+[Fanan Dala](https://fanandala.com)
 
 ## License
 
-The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
