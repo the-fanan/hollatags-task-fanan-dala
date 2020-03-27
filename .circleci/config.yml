@@ -23,7 +23,7 @@ jobs:
         environment:
           MYSQL_DATABASE: testing
       #
-      # - image: redis:2.8.19
+      - image: redis:latest
 
     steps:
       - checkout
@@ -33,8 +33,8 @@ jobs:
       - run: sudo apt install -y zlib1g-dev libsqlite3-dev
       - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
       - run: sudo docker-php-ext-install zip gd exif pdo_mysql
-      - run: sudo apt-get install redis-server
-      - run: sudo systemctl enable redis-server.service
+      #- run: sudo apt-get install redis-server
+      #- run: sudo systemctl enable redis-server.service
       - run: sudo apt-get install php-redis
       - run: cp .env.example .env
 
