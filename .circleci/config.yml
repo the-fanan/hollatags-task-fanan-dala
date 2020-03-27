@@ -1,0 +1,64 @@
+# PHP CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-php/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # Specify the version you desire here
+      - image: circleci/php:7.2-cli
+        environment:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_DB: testing
+          MYSQL_USER: root
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_PASSWORD:
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # Using the RAM variation mitigates I/O contention
+      # for database intensive operations.
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_DATABASE: testing
+      #
+      # - image: redis:2.8.19
+
+    steps:
+      - checkout
+
+      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File 
+      #- run: sudo apt install -y mysql-client
+      - run: sudo apt install -y zlib1g-dev libsqlite3-dev
+      - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
+      - run: sudo docker-php-ext-install zip gd exif pdo_mysql
+      - run: sudo apt-get install redis-server
+      - run: sudo systemctl enable redis-server.service
+      - run: sudo apt-get install php-redis
+      - run: cp .env.example .env
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            # "composer.lock" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+      # set up project and queues
+      - run: php artisan key:generate
+      - run: php artisan migrate:fresh --seed
+      - run: php artisan queue:work --queue=q1 &
+      - run: php artisan queue:work --queue=q2 &
+      - run: php artisan queue:work --queue=q3 &
+      - run: php artisan queue:work --queue=q4 &
+      - run: php artisan queue:work --queue=q5 &
+      # run tests with phpunit or codecept
+      - run: ./vendor/bin/phpunit
