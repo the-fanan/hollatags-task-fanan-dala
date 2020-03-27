@@ -18,14 +18,14 @@ class MockBillerDriverTest extends TestCase
     {
         $biller = new MockBiller;
         $response = $biller->chargeCustomer([]);
-        $this->assertEquals($response->getData()->status, 'error');
+        $this->assertEquals($response['status'], 'error');
     }
 
     public function testValidBillingDetailsSucceeded()
     {
         $biller = new MockBiller;
         $response = $biller->chargeCustomer(['mobile_number' => '+193349847384', 'amount' => 500000]);
-        $this->assertEquals($response->getData()->status, 'success');
-        $this->assertEquals($response->getData()->data->amount, 500000);
+        $this->assertEquals($response['status'], 'success');
+        $this->assertEquals($response['data']['amount'], 500000);
     }
 }

@@ -19,18 +19,20 @@ class MockBiller implements BillingInterface {
 		]);
 
 		if ($validator->fails()) {
-			return response()->json([
+			return [
 				'status' => 'error',
 				'errors' => $validator->errors(),
-			],400);
+				'status_code' => 400,
+			];
 		}
 
-		sleep(1.5);
+		sleep(1.6);
 
-		return response()->json([
+		return [
 			'status' => 'success',
 			'data' => ['amount' => $chargeData['amount']],
-		],200);
+			'status_code' => 200
+		];
 
 	}
 }
