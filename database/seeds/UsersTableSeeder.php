@@ -12,6 +12,6 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(User::Class, 10000)->create();
+        factory(User::Class, env('SEED_USERS_NUMBER', 10))->create();
     }
 }
