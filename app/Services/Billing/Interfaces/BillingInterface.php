@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Service\Billing\Interfaces;
+namespace App\Services\Billing\Interfaces;
 
 interface BillingInterface {
 	/**
